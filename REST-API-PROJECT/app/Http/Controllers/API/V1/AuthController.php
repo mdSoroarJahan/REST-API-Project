@@ -66,10 +66,23 @@ class AuthController extends Controller
         $token = $user->createToken('ABC_123')->plainTextToken;
 
         return response()->json([
-            'user' => 'User Login Successfully',
+            'user' => $user,
+            'message' => 'User Login Successfully',
             'status' => 200,
             'token' => $token
         ], 200);
     }
-    public function logout() {}
+    public function logout()
+    {
+        // Delete current token
+        Auth::user()->currentAccessToken()->delete();
+
+        // Delete all token
+        // Auth::user()->token()->delete();
+
+        return response()->json([
+            'message' => 'User logged out Successfully',
+            'status' => 200
+        ], 200);
+    }
 }
