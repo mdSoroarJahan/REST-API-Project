@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -34,11 +35,41 @@ class AuthController extends Controller
         $token = $user->createToken('ABC_123')->plainTextToken;
         return response()->json([
             'user' => $user,
-            'message' => 'Post Created Successfully',
+            'message' => 'User register successfully',
             'status' => 201,
             'token' => $token
         ], 201);
     }
-    public function login() {}
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors(),
+                'message' => 'Validation Error',
+                'status' => 422
+            ], 422);
+        }
+
+        if (!Auth::attempt($request->only(['email', 'password']))) {
+            return response()->json([
+                'message' => 'Unauthorize',
+                'status' => 401
+            ], 401);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        $token = $user->createToken('ABC_123')->plainTextToken;
+
+        return response()->json([
+            'user' => 'User Login Successfully',
+            'status' => 200,
+            'token' => $token
+        ], 200);
+    }
     public function logout() {}
 }
